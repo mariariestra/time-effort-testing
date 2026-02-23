@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Time & Effort Report v2.1 - EcoExploratorio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      padding: 40px 30px;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 15px;
+    }
+
+    .progress-steps {
+      display: flex;
+      padding: 30px;
+      border-bottom: 1px solid #e5e7eb;
+      gap: 12px;
+    }
+
+    .step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .step-circle.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .step-circle.completed {
+      background: #10b981;
+      color: white;
+    }
+
+    .step-label {
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: center;
+      font-weight: 400;
+    }
+
+    .step-label.active {
+      color: #1f2937;
+      font-weight: 600;
+    }
+
+    .content {
+      padding: 40px 30px;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
+    }
+
+    h2 {
+      color: #1f2937;
+      font-size: 24px;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #374151;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .required {
+      color: #ef4444;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .helper-text {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .error-message {
+      color: #ef4444;
+      font-size: 13px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .funding-source {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+
+    .funding-source.has-value {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    .funding-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+
+    .funding-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+
+    .funding-label {
+      flex: 1;
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 15px;
+    }
+
+    .hours-input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hours-and-tasks {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+    }
+
+    .hours-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .hours-input-wrapper input {
+      padding-right: 50px;
+    }
+
+    .hours-label {
+      position: absolute;
+      right: 12px;
+      color: #9ca3af;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .total-box {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-box.valid {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+
+    .total-box.invalid {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .total-percent {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .cert-box {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .cert-footer {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #bfdbfe;
+      font-size: 12px;
+      color: #1e40af;
+      font-style: italic;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #e5e7eb;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #2563eb;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #059669;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .success-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .success-modal.show {
+      display: flex;
+    }
+
+    .success-content {
+      background: white;
+      padding: 48px;
+      border-radius: 16px;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .daily-breakdown {
+      margin-top: 12px;
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .daily-breakdown-header {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+
+    .daily-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+    }
+
+    .daily-input {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .daily-input label {
+      font-size: 11px;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .daily-input input {
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+
+    .toggle-daily {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+      align-self: flex-start;
+    }
+
+    .toggle-daily:hover {
+      background: #2563eb;
+    }
+
+    @media (max-width: 640px) {
+      .hours-and-tasks {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .daily-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="success-modal" id="successModal">
+    <div class="success-content">
+      <div class="success-icon">✓</div>
+      <h2>¡Enviado Exitosamente!</h2>
+      <p style="margin: 16px 0; color: #6b7280;">Tu Time & Effort Report ha sido recibido.</p>
+      <p style="font-weight: 600; color: #1f2937; margin: 16px 0;" id="submissionIdDisplay"></p>
+      <button class="btn-primary" onclick="location.reload()" style="margin-top: 24px;">Cerrar</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Time & Effort Report</h1>
+      <p>EcoExploratorio: Museo de Ciencias de Puerto Rico</p>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+      <div class="step">
+        <div class="step-circle active" id="circle-1">1</div>
+        <span class="step-label active" id="label-1">Employee Info</span>
+      </div>
+      <div class="step">
+        <div class="step-circle" id="circle-2">2</div>
+        <span class="step-label" id="label-2">Time Distribution</span>
+      </div>
+      <div class="step">
+        <div class="step-circle" id="circle-3">3</div>
+        <span class="step-label" id="label-3">Certification & Submit</span>
+      </div>
+    </div>
+
+    <!-- Form Content -->
+    <div class="content">
+      <!-- STEP 1: Employee Information -->
+      <div class="form-section active" id="section-1">
+        <h2>Employee Information</h2>
+
+        <div class="form-group">
+          <label>Employee Full Name <span class="required">*</span></label>
+          <select id="employeeName">
+            <option value="">Select your name...</option>
+            <option value="Alba Figueroa">Alba Figueroa</option>
+            <option value="Aibenlitz del Río">Aibenlitz del Río</option>
+            <option value="Annais Talbott">Annais Talbott</option>
+            <option value="Arnaldo Cabrera">Arnaldo Cabrera</option>
+            <option value="Atenas Leandry">Atenas Leandry</option>
+            <option value="Bryan Serrano">Bryan Serrano</option>
+            <option value="Daneisha Morales">Daneisha Morales</option>
+            <option value="Ferdinand Guzmán">Ferdinand Guzmán</option>
+            <option value="Gitza Más">Gitza Más</option>
+            <option value="Gladys Flecha">Gladys Flecha</option>
+            <option value="Irmaris Rivera">Irmaris Rivera</option>
+            <option value="Jennifer Espada">Jennifer Espada</option>
+            <option value="Jenny Guevara">Jenny Guevara</option>
+            <option value="Laureliz Antuna">Laureliz Antuna</option>
+            <option value="Maria Riestra">Maria Riestra</option>
+            <option value="Marieliz Díaz">Marieliz Díaz</option>
+            <option value="Merry Manso">Merry Manso</option>
+            <option value="Millie Medina">Millie Medina</option>
+            <option value="Nataly Cortés">Nataly Cortés</option>
+            <option value="Sara Olivero">Sara Olivero</option>
+            <option value="Sonimar Medina">Sonimar Medina</option>
+            <option value="Valeria Santiago">Valeria Santiago</option>
+          </select>
+          <span class="error-message" id="error-employeeName"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Job Title / Position <span class="required">*</span></label>
+          <select id="jobTitle">
+            <option value="">Select job title...</option>
+            <option value="Administration IT">Administration IT</option>
+            <option value="Asistente de Educación">Asistente de Educación</option>
+            <option value="Asistente de Educación y Montaje">Asistente de Educación y Montaje</option>
+            <option value="Community Events & Education Manager">Community Events & Education Manager</option>
+            <option value="Coordinadora de Operaciones y Servicios">Coordinadora de Operaciones y Servicios</option>
+            <option value="Director de Finanzas">Director de Finanzas</option>
+            <option value="Directora Ejecutiva">Directora Ejecutiva</option>
+            <option value="Diseñadora Gráfica">Diseñadora Gráfica</option>
+            <option value="Educador ERI">Educador ERI</option>
+            <option value="Educadora">Educadora</option>
+            <option value="Educadora ERI">Educadora ERI</option>
+            <option value="ERI Compliance and Assistant to the Project Director">ERI Compliance and Assistant to the Project Director</option>
+            <option value="ERI Project Director">ERI Project Director</option>
+            <option value="Exhibit Administrator">Exhibit Administrator</option>
+            <option value="Gerente Administrativo">Gerente Administrativo</option>
+            <option value="Gerente de Educación y Alcance Comunitaria ERI">Gerente de Educación y Alcance Comunitaria ERI</option>
+            <option value="Gerente de Operaciones">Gerente de Operaciones</option>
+            <option value="Social Media Specialist">Social Media Specialist</option>
+            <option value="Other">Other (specify below)</option>
+          </select>
+          <span class="error-message" id="error-jobTitle"></span>
+        </div>
+
+        <div class="form-group" id="otherJobTitleGroup" style="display: none;">
+          <label>Specify Job Title <span class="required">*</span></label>
+          <input type="text" id="otherJobTitle" placeholder="Enter your job title">
+          <span class="error-message" id="error-otherJobTitle"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Department / Program Area <span class="required">*</span></label>
+          <select id="department">
+            <option value="">Select department...</option>
+            <option value="Education">Education</option>
+            <option value="Exhibits">Exhibits</option>
+            <option value="Administration">Administration</option>
+            <option value="Operations">Operations</option>
+            <option value="Finance">Finance</option>
+            <option value="ERI - Resilience Institute">ERI - Resilience Institute</option>
+            <option value="Other">Other</option>
+          </select>
+          <span class="error-message" id="error-department"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Pay Period (Bi-Weekly) <span class="required">*</span></label>
+          <select id="payPeriod">
+            <option value="">Select pay period...</option>
+          </select>
+          <span class="error-message" id="error-payPeriod"></span>
+        </div>
+      </div>
+
+      <!-- STEP 2: Time Distribution -->
+      <div class="form-section" id="section-2">
+        <h2>Time Distribution by Funding Source</h2>
+        
+        <div class="form-group">
+          <label>Total Hours Worked During This Pay Period</label>
+          <input type="number" id="totalHours" placeholder="Will auto-calculate from hours below" min="0" step="0.5" readonly style="background: #f3f4f6; cursor: not-allowed;">
+          <div class="helper-text">This field auto-calculates as you enter hours in each project below</div>
+          <span class="error-message" id="error-totalHours"></span>
+        </div>
+
+        <p style="font-size: 14px; color: #6b7280; margin: 24px 0; line-height: 1.6;">
+          Enter the hours spent on each funding source and describe the activities performed.
+          The total hours must match the total hours worked above.
+        </p>
+
+        <!-- Total Display -->
+        <div class="total-box invalid" id="totalBox">
+          <div>
+            <div style="font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 4px;">
+              Total Hours Allocated
+            </div>
+            <div style="font-size: 12px; color: #6b7280;" id="totalMessage">
+              Must equal total hours worked
+            </div>
+          </div>
+          <div class="total-percent" id="totalHours2">0.0 hrs</div>
+        </div>
+
+        <!-- Funding Sources -->
+        <div id="fundingSourcesContainer"></div>
+
+        <!-- DAILY SUMMARY TABLE (14 días - 2 semanas) -->
+        <div id="dailySummaryContainer" style="margin-top: 32px; padding: 24px; background: #f8fafc; border-radius: 8px; border: 2px solid #e2e8f0; display: none;">
+          <h3 style="margin-top: 0; color: #1e40af; font-size: 18px;">📊 Resumen Diario de Horas - 2 Semanas</h3>
+          <p style="font-size: 14px; color: #64748b; margin-bottom: 16px;">Esta tabla muestra la suma total de horas por día en TODOS los proyectos.</p>
+          
+          <div style="overflow-x: auto;">
+            <table id="dailySummaryTable" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); min-width: 1000px;">
+              <thead>
+                <tr id="dailyHeaderRow" style="background: #1e40af; color: white;">
+                  <!-- Populated dynamically based on pay period -->
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="dailyHoursRow">
+                  <!-- Populated dynamically -->
+                </tr>
+                <tr id="dailyStatusRow">
+                  <!-- Populated dynamically -->
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div style="margin-top: 16px; padding: 12px; background: white; border-radius: 4px; font-size: 13px; color: #64748b;">
+            <strong>Leyenda:</strong><br>
+            ✅ = 8 horas (perfecto) &nbsp;|&nbsp; ⚠️ = ≠ 8 horas (revisar) &nbsp;|&nbsp; - = 0 horas (no trabajado)
+          </div>
+        </div>
+
+
+        <span class="error-message" id="error-hours"></span>
+      </div>
+
+      <!-- STEP 3: Employee Certification -->
+      <div class="form-section" id="section-3">
+        <h2>Employee Certification & Submit</h2>
+
+        <div class="cert-box">
+          <div style="font-size: 14px; line-height: 1.8; color: #1f2937; margin-bottom: 16px;">
+            <strong>I certify that:</strong>
+            <ul style="margin-top: 12px; padding-left: 24px;">
+              <li>This report accurately reflects the <strong>actual time worked</strong> by me during the period indicated above</li>
+              <li>The distribution of time is a <strong>true and correct representation</strong> of my activities</li>
+              <li>This information is used to support salary charges to grants and may be subject to <strong>audit or review</strong></li>
+              <li>I understand that knowingly providing false information may result in <strong>disciplinary action and recovery of funds</strong></li>
+            </ul>
+          </div>
+          <div class="cert-footer">
+            In compliance with 2 CFR 200.430(i) - Compensation for Personal Services
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Employee Electronic Signature (Full Name) <span class="required">*</span></label>
+          <input type="text" id="employeeSignature" placeholder="Type your full name">
+          <div class="helper-text">By typing your name, you are electronically signing this document</div>
+          <span class="error-message" id="error-employeeSignature"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Date <span class="required">*</span></label>
+          <input type="date" id="employeeDate">
+          <span class="error-message" id="error-employeeDate"></span>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="button-group">
+        <button type="button" class="btn-secondary" id="btnPrev" style="display: none;">← Previous</button>
+        <button type="button" class="btn-primary" id="btnNext">Next →</button>
+        <button type="button" class="btn-success" id="btnSubmit" style="display: none;">Submit Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration
+    const fundingSources = [
+      { key: 'eri', label: 'ERI Grant', color: '#3b82f6', budgetKey: 'eri', required: false },
+      { key: 'nasaIsla', label: 'NASA-Isla', color: '#8b5cf6', budgetKey: 'nasaIsla', required: false },
+      { key: 'oceanos', label: 'Océanos', color: '#06b6d4', budgetKey: 'oceanos', required: false },
+      { key: 'capex', label: 'CAPEX', color: '#10b981', budgetKey: 'capex', required: false },
+      { key: 'dol', label: 'Ley 52 (DOL)', color: '#f59e0b', budgetKey: 'ley52', required: false },
+      { key: 'private', label: 'Private Funding', color: '#ec4899', budgetKey: 'private', required: false },
+      { key: 'unrestricted', label: 'EcoEx General (Unrestricted)', color: '#6b7280', budgetKey: 'ecoex', required: true }
+    ];
+
+    const ptoTypes = [
+      { key: 'holiday', label: 'Holiday' },
+      { key: 'vacation', label: 'Vacation' },
+      { key: 'sick', label: 'Sick Day' }
+    ];
+
+    let currentStep = 1;
+    let currentEmployeeAllocation = null;
+
+    // Generate pay periods (bi-weekly)
+    function generatePayPeriods() {
+      const periods = [];
+      const startDate = new Date(2026, 1, 2); // Feb 2, 2026 (month is 0-indexed)
+      
+      for (let i = 0; i < 26; i++) {
+        const periodStart = new Date(startDate);
+        periodStart.setDate(periodStart.getDate() + (i * 14));
+        
+        const periodEnd = new Date(periodStart);
+        periodEnd.setDate(periodEnd.getDate() + 13);
+        
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        const startMonth = monthNames[periodStart.getMonth()];
+        const startDay = periodStart.getDate();
+        const endMonth = monthNames[periodEnd.getMonth()];
+        const endDay = periodEnd.getDate();
+        const year = periodStart.getFullYear();
+        
+        const label = `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year} (14 días)`;
+        const value = periodStart.toISOString().split('T')[0] + '|' + periodEnd.toISOString().split('T')[0];
+        
+        periods.push({ label, value });
+      }
+      
+      return periods;
+    }
+
+    // Populate daily summary table headers based on pay period
+    function populateDailySummaryTable() {
+      const payPeriodSelect = document.getElementById('payPeriod');
+      if (!payPeriodSelect || !payPeriodSelect.value) {
+        document.getElementById('dailySummaryContainer').style.display = 'none';
+        return;
+      }
+      
+      const [startStr, endStr] = payPeriodSelect.value.split('|');
+      const startDate = new Date(startStr);
+      const endDate = new Date(endStr);
+      
+      // Get all dates
+      const dates = [];
+      let currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        dates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      // Populate header row
+      const headerRow = document.getElementById('dailyHeaderRow');
+      const hoursRow = document.getElementById('dailyHoursRow');
+      const statusRow = document.getElementById('dailyStatusRow');
+      
+      const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      
+      headerRow.innerHTML = '';
+      hoursRow.innerHTML = '';
+      statusRow.innerHTML = '';
+      
+      dates.forEach(date => {
+        const dayName = days[date.getDay()];
+        const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
+        
+        // Header
+        const th = document.createElement('th');
+        th.style.cssText = 'padding: 8px; text-align: center; border: 1px solid #cbd5e1; font-size: 11px;';
+        th.innerHTML = `${dayName}<br>${monthDay}`;
+        headerRow.appendChild(th);
+        
+        // Hours cell
+        const td1 = document.createElement('td');
+        td1.style.cssText = 'padding: 8px; text-align: center; font-weight: bold; font-size: 14px; border: 1px solid #cbd5e1; background: #f1f5f9;';
+        td1.textContent = '0.0';
+        hoursRow.appendChild(td1);
+        
+        // Status cell
+        const td2 = document.createElement('td');
+        td2.style.cssText = 'padding: 8px; text-align: center; font-size: 20px; border: 1px solid #cbd5e1; background: #f1f5f9;';
+        td2.textContent = '-';
+        statusRow.appendChild(td2);
+      });
+      
+      document.getElementById('dailySummaryContainer').style.display = 'block';
+      updateDailySummary();
+    }
+
+    
+    // Toggle PTO daily breakdown
+    function togglePTODailyBreakdown(ptoKey) {
+      const hours = parseFloat(document.getElementById(`pto-${ptoKey}`).value) || 0;
+      const dailySection = document.getElementById(`daily-pto-${ptoKey}`);
+      const toggleBtn = document.getElementById(`toggle-pto-${ptoKey}`);
+      
+      if (hours > 0) {
+        toggleBtn.style.display = 'block';
+        populatePTODailyBreakdown(ptoKey);
+      } else {
+        toggleBtn.style.display = 'none';
+        dailySection.style.display = 'none';
+      }
+    }
+    
+    // Populate PTO daily breakdown
+    function populatePTODailyBreakdown(ptoKey) {
+      const payPeriodSelect = document.getElementById('payPeriod');
+      if (!payPeriodSelect.value) return;
+      
+      const [startStr, endStr] = payPeriodSelect.value.split('|');
+      const startDate = new Date(startStr);
+      const endDate = new Date(endStr);
+      
+      const dailyGrid = document.getElementById(`daily-grid-pto-${ptoKey}`);
+      const existingInputs = {};
+      
+      // Save existing values
+      dailyGrid.querySelectorAll('input').forEach(input => {
+        existingInputs[input.id] = input.value;
+      });
+      
+      dailyGrid.innerHTML = '';
+      
+      let currentDate = new Date(startDate);
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      
+      while (currentDate <= endDate) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const dayName = days[currentDate.getDay()];
+        const monthDay = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
+        const inputId = `daily-pto-${ptoKey}-${dateStr}`;
+        
+        const dailyInput = document.createElement('div');
+        dailyInput.className = 'daily-input';
+        dailyInput.innerHTML = `
+          <label>${dayName} ${monthDay}</label>
+          <input 
+            type="number" 
+            id="${inputId}"
+            min="0" 
+            step="0.5" 
+            placeholder="0"
+            value="${existingInputs[inputId] || ''}">
+        `;
+        dailyGrid.appendChild(dailyInput);
+        
+        // Add event listener
+        dailyInput.querySelector('input').addEventListener('input', () => {
+          updateTotalPTOFromDaily(ptoKey);
+          updateDailySummary();
+        });
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+    
+    // Update PTO total from daily breakdown
+    function updateTotalPTOFromDaily(ptoKey) {
+      const dailyInputs = document.querySelectorAll(`#daily-grid-pto-${ptoKey} input`);
+      let total = 0;
+      
+      dailyInputs.forEach(input => {
+        total += parseFloat(input.value) || 0;
+      });
+      
+      document.getElementById(`pto-${ptoKey}`).value = total > 0 ? total.toFixed(1) : '';
+      calculateTotal();
+    }
+
+    // UPDATE DAILY SUMMARY TABLE (14 days - 2 weeks)
+    function updateDailySummary() {
+      const payPeriodSelect = document.getElementById('payPeriod');
+      if (!payPeriodSelect || !payPeriodSelect.value) return;
+      
+      const [startStr, endStr] = payPeriodSelect.value.split('|');
+      const startDate = new Date(startStr);
+      const endDate = new Date(endStr);
+      
+      // Get all dates in the pay period
+      const dates = [];
+      let currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        dates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      // Sum hours for each date across all projects
+      const totals = new Array(dates.length).fill(0);
+      
+      fundingSources.forEach(source => {
+        dates.forEach((dateStr, index) => {
+          const input = document.getElementById(`daily-${source.key}-${dateStr}`);
+          if (input && input.value) {
+            totals[index] += parseFloat(input.value) || 0;
+          }
+        });
+      });
+      
+      // ALSO sum PTO hours for each date
+      ptoTypes.forEach(pto => {
+        dates.forEach((dateStr, index) => {
+          const input = document.getElementById(`daily-pto-${pto.key}-${dateStr}`);
+          if (input && input.value) {
+            totals[index] += parseFloat(input.value) || 0;
+          }
+        });
+      });
+      
+      // Update table
+      const hoursRow = document.getElementById('dailyHoursRow');
+      const statusRow = document.getElementById('dailyStatusRow');
+      
+      if (hoursRow && statusRow && hoursRow.cells.length === totals.length) {
+        totals.forEach((total, index) => {
+          hoursRow.cells[index].textContent = total.toFixed(1);
+          
+          let emoji, bg;
+          if (total === 0) {
+            emoji = '-';
+            bg = '#f1f5f9';
+          } else if (Math.abs(total - 8) < 0.1) {
+            emoji = '✅';
+            bg = '#dcfce7';
+          } else {
+            emoji = '⚠️';
+            bg = '#fef3c7';
+          }
+          
+          statusRow.cells[index].innerHTML = emoji;
+          statusRow.cells[index].style.background = bg;
+          hoursRow.cells[index].style.background = bg;
+        });
+      }
+    }
+    function init() {
+      // PRE-FILL
+      const urlParams = new URLSearchParams(window.location.search);
+      const prefillData = urlParams.get('prefill');
+      if (prefillData) {
+        try {
+          const d = JSON.parse(decodeURIComponent(prefillData));
+          if (d.employeeName) document.getElementById('employeeName').value = d.employeeName;
+          if (d.department) document.getElementById('department').value = d.department;
+          if (d.payPeriod) document.getElementById('payPeriod').value = d.payPeriod;
+          if (d.totalHours) document.getElementById('totalHours').value = d.totalHours;
+          if (d.jobTitle) {
+            const j = document.getElementById('jobTitle');
+            if ([...j.options].some(o => o.value === d.jobTitle)) j.value = d.jobTitle;
+            else { j.value = 'Other'; setTimeout(() => { document.getElementById('otherJobTitleContainer').style.display='block'; document.getElementById('otherJobTitle').value=d.jobTitle; },100); }
+          }
+          ['eri','nasaIsla','oceanos','capex','ley52','private','ecoex'].forEach(p => {
+            if(d[p+'_hours']){const h=document.getElementById('hours-'+p);if(h)h.value=d[p+'_hours'];}
+            if(d[p+'_tasks']){const t=document.getElementById('tasks-'+p);if(t)t.value=d[p+'_tasks'];}
+          });
+          if (d.supersedes) window.supersedesId = d.supersedes;
+          const b=document.createElement('div');
+          b.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#fef3c7;border:2px solid #f59e0b;padding:16px 24px;border-radius:8px;z-index:10000;max-width:600px;text-align:center;box-shadow:0 4px 6px rgba(0,0,0,0.2);font-family:Arial;';
+          b.innerHTML='<strong style="color:#b45309;">⚠️ FORMULARIO PRE-LLENADO</strong><br><span style="color:#92400e;">Este T&E fue rechazado. Corrige y resomete.</span>';
+          document.body.appendChild(b);
+          setTimeout(()=>b.remove(),12000);
+        } catch(e){}
+      }
+
+      // Auto-fill today's date
+      const dateField = document.getElementById('employeeDate');
+      if (dateField && !dateField.value) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        dateField.value = `${year}-${month}-${day}`;
+      }
+
+      populatePayPeriods();
+      renderFundingSources();
+      setupEventListeners();
+      updateSummary();
+    }
+
+    // Populate pay periods dropdown
+    function populatePayPeriods() {
+      const select = document.getElementById('payPeriod');
+      const periods = generatePayPeriods();
+      
+      console.log('Generating pay periods...');
+      console.log('Total periods generated:', periods.length);
+      
+      if (periods.length === 0) {
+        console.error('ERROR: No periods generated!');
+        return;
+      }
+      
+      periods.forEach((period, index) => {
+        const option = document.createElement('option');
+        option.value = period.value;
+        option.textContent = period.label;
+        select.appendChild(option);
+        
+        if (index === 0) {
+          console.log('First period:', period.label);
+        }
+      });
+      
+      console.log('Pay periods populated successfully');
+    }
+
+    // Render funding sources with budget tracking
+    function renderFundingSources() {
+      const container = document.getElementById('fundingSourcesContainer');
+      
+      let html = '';
+      
+      // Regular funding sources
+      fundingSources.forEach(source => {
+        // Get budgeted percentage for this project
+        let budgetInfo = '';
+        if (currentEmployeeAllocation && currentEmployeeAllocation[source.budgetKey]) {
+          const budgetPct = (currentEmployeeAllocation[source.budgetKey] * 100).toFixed(0);
+          budgetInfo = `<span style="font-size: 12px; color: #059669; background: #dcfce7; padding: 3px 8px; border-radius: 4px; margin-left: 8px;">Budget: ${budgetPct}%</span>`;
+        }
+        
+        html += `
+        <div class="funding-source" id="funding-${source.key}">
+          <div class="funding-header">
+            <div class="funding-color" style="background: ${source.color};"></div>
+            <div class="funding-label">${source.label} ${budgetInfo}</div>
+            <div style="font-size: 13px; color: #6b7280; font-weight: 600; margin-left: auto;" id="percent-${source.key}">0%</div>
+          </div>
+          
+          <div class="hours-input-section">
+            <div class="hours-and-tasks">
+              <div class="hours-input-wrapper">
+                <input 
+                  type="number" 
+                  id="hours-${source.key}" 
+                  min="0" 
+                  step="0.5" 
+                  placeholder="0"
+                  data-funding="${source.key}">
+                <span class="hours-label">hours</span>
+              </div>
+              <textarea 
+                id="tasks-${source.key}" 
+                placeholder="Describe tasks/activities performed on this project..."
+                rows="2"
+                style="resize: vertical; min-height: 44px;"></textarea>
+            </div>
+            
+            <div class="daily-breakdown" id="daily-${source.key}" style="display: none;">
+              <div class="daily-breakdown-header">Daily Hours Breakdown (optional)</div>
+              <div class="daily-grid" id="daily-grid-${source.key}">
+                <!-- Will be populated dynamically based on pay period -->
+              </div>
+            </div>
+          </div>
+        </div>
+        `;
+      });
+      
+      // EcoEx General - PTO Section
+      html += `
+        <div class="funding-source" id="funding-ecoexGeneral" style="background: #fef3c7; border: 2px solid #f59e0b;">
+          <div class="funding-header">
+            <div class="funding-color" style="background: #f59e0b;"></div>
+            <div class="funding-label">EcoEx General - PTO (Paid Time Off)</div>
+            <div style="font-size: 13px; color: #6b7280; font-weight: 600; margin-left: auto;" id="percent-ecoexGeneral">0%</div>
+          </div>
+          
+          <div style="font-size: 12px; color: #92400e; margin-bottom: 12px; font-style: italic;">
+            Only enter hours if you took Holiday, Vacation, or Sick Day during this pay period
+          </div>
+          
+          <div class="hours-input-section">
+      `;
+      
+      // PTO types
+      ptoTypes.forEach(pto => {
+        html += `
+            <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: 6px;">
+              <div style="display: grid; grid-template-columns: 200px 140px 1fr; gap: 12px; align-items: center; margin-bottom: 8px;">
+                <label style="font-size: 13px; color: #1f2937; font-weight: 500; margin: 0;">${pto.label}:</label>
+                <div class="hours-input-wrapper">
+                  <input 
+                    type="number" 
+                    id="pto-${pto.key}" 
+                    min="0" 
+                    step="0.5" 
+                    placeholder="0"
+                    data-pto="${pto.key}">
+                  <span class="hours-label">hours</span>
+                </div>
+                <button type="button" class="toggle-daily" id="toggle-pto-${pto.key}" style="padding: 6px 12px; font-size: 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; display: none;">
+                  📅 Select Dates
+                </button>
+              </div>
+              
+              <div class="daily-breakdown" id="daily-pto-${pto.key}" style="display: none; margin-top: 8px;">
+                <div class="daily-breakdown-header">Select which days you took ${pto.label}</div>
+                <div class="daily-grid" id="daily-grid-pto-${pto.key}">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+        `;
+      });
+      
+      html += `
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+      
+      // Add event listeners for hours inputs
+      fundingSources.forEach(source => {
+        const hoursInput = document.getElementById(`hours-${source.key}`);
+        const tasksInput = document.getElementById(`tasks-${source.key}`);
+        
+        hoursInput.addEventListener('input', () => {
+          calculateTotal();
+          toggleDailyBreakdown(source.key);
+        });
+        
+        tasksInput.addEventListener('input', () => {
+          updateFundingStyle(source.key);
+        });
+      });
+      
+      // Add event listeners for PTO inputs
+      ptoTypes.forEach(pto => {
+        const ptoInput = document.getElementById(`pto-${pto.key}`);
+        const toggleBtn = document.getElementById(`toggle-pto-${pto.key}`);
+        
+        ptoInput.addEventListener('input', () => {
+          calculateTotal();
+          togglePTODailyBreakdown(pto.key);
+        });
+        
+        toggleBtn.addEventListener('click', () => {
+          const dailySection = document.getElementById(`daily-pto-${pto.key}`);
+          if (dailySection.style.display === 'none') {
+            dailySection.style.display = 'block';
+            populatePTODailyBreakdown(pto.key);
+          } else {
+            dailySection.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // Toggle daily breakdown
+    function toggleDailyBreakdown(fundingKey) {
+      const hours = parseFloat(document.getElementById(`hours-${fundingKey}`).value) || 0;
+      const dailySection = document.getElementById(`daily-${fundingKey}`);
+      
+      if (hours > 0) {
+        dailySection.style.display = 'block';
+        populateDailyBreakdown(fundingKey);
+      } else {
+        dailySection.style.display = 'none';
+      }
+    }
+
+    // Populate daily breakdown for a funding source
+    function populateDailyBreakdown(fundingKey) {
+      const payPeriodSelect = document.getElementById('payPeriod');
+      if (!payPeriodSelect.value) return;
+      
+      const [startStr, endStr] = payPeriodSelect.value.split('|');
+      const startDate = new Date(startStr);
+      const endDate = new Date(endStr);
+      
+      const dailyGrid = document.getElementById(`daily-grid-${fundingKey}`);
+      
+      // Save existing values before clearing
+      const existingInputs = {};
+      dailyGrid.querySelectorAll('input').forEach(input => {
+        existingInputs[input.id] = input.value;
+      });
+      
+      dailyGrid.innerHTML = '';
+      
+      let currentDate = new Date(startDate);
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      
+      while (currentDate <= endDate) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const dayName = days[currentDate.getDay()];
+        const monthDay = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
+        const inputId = `daily-${fundingKey}-${dateStr}`;
+        
+        const dailyInput = document.createElement('div');
+        dailyInput.className = 'daily-input';
+        dailyInput.innerHTML = `
+          <label>${dayName} ${monthDay}</label>
+          <input 
+            type="number" 
+            id="${inputId}"
+            min="0" 
+            step="0.5" 
+            placeholder="0"
+            value="${existingInputs[inputId] || ''}">
+        `;
+        dailyGrid.appendChild(dailyInput);
+        
+        // Add event listener to recalculate
+        dailyInput.querySelector('input').addEventListener('input', () => {
+          updateTotalFromDaily(fundingKey);
+          updateDailySummary();
+        });
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+
+    // Update total hours from daily breakdown
+    function updateTotalFromDaily(fundingKey) {
+      const dailyInputs = document.querySelectorAll(`#daily-grid-${fundingKey} input`);
+      let total = 0;
+      
+      dailyInputs.forEach(input => {
+        total += parseFloat(input.value) || 0;
+      });
+      
+      document.getElementById(`hours-${fundingKey}`).value = total > 0 ? total.toFixed(1) : '';
+      calculateTotal();
+    }
+
+    // Update funding source styling
+    function updateFundingStyle(fundingKey) {
+      const hours = parseFloat(document.getElementById(`hours-${fundingKey}`).value) || 0;
+      const tasks = document.getElementById(`tasks-${fundingKey}`).value.trim();
+      const fundingDiv = document.getElementById(`funding-${fundingKey}`);
+      
+      if (hours > 0 || tasks) {
+        fundingDiv.classList.add('has-value');
+      } else {
+        fundingDiv.classList.remove('has-value');
+      }
+    }
+
+    // Calculate total hours
+    function calculateTotal() {
+      let allocatedHours = 0;
+
+      // Calculate hours from funding sources
+      fundingSources.forEach(source => {
+        const hours = parseFloat(document.getElementById(`hours-${source.key}`).value) || 0;
+        allocatedHours += hours;
+        updateFundingStyle(source.key);
+      });
+      
+      // Calculate PTO hours
+      let ptoHours = 0;
+      ptoTypes.forEach(pto => {
+        const hours = parseFloat(document.getElementById(`pto-${pto.key}`).value) || 0;
+        ptoHours += hours;
+      });
+      allocatedHours += ptoHours;
+      
+      // AUTO-FILL Total Hours field with calculated total
+      const totalHoursField = document.getElementById('totalHours');
+      totalHoursField.value = allocatedHours > 0 ? allocatedHours.toFixed(1) : '';
+      
+      // Update percentages after we know the total
+      fundingSources.forEach(source => {
+        const hours = parseFloat(document.getElementById(`hours-${source.key}`).value) || 0;
+        const percentage = allocatedHours > 0 ? (hours / allocatedHours * 100).toFixed(1) : 0;
+        const percentEl = document.getElementById(`percent-${source.key}`);
+        if (percentEl) {
+          percentEl.textContent = percentage + '%';
+          percentEl.style.color = hours > 0 ? '#059669' : '#6b7280';
+        }
+      });
+      
+      // Update PTO percentage
+      const ptoPercentage = allocatedHours > 0 ? (ptoHours / allocatedHours * 100).toFixed(1) : 0;
+      const ptoPercentEl = document.getElementById('percent-ecoexGeneral');
+      if (ptoPercentEl) {
+        ptoPercentEl.textContent = ptoPercentage + '%';
+        ptoPercentEl.style.color = ptoHours > 0 ? '#f59e0b' : '#6b7280';
+      }
+
+      // Update total display
+      const totalBox = document.getElementById('totalBox');
+      const totalHours2 = document.getElementById('totalHours2');
+      const totalMessage = document.getElementById('totalMessage');
+
+      totalHours2.textContent = allocatedHours.toFixed(1) + ' hrs';
+
+      if (allocatedHours === 0) {
+        totalBox.className = 'total-box invalid';
+        totalMessage.textContent = 'Enter hours in projects below';
+      } else {
+        totalBox.className = 'total-box valid';
+        totalMessage.textContent = '✓ Total calculated automatically';
+      }
+      
+      // Check for variance
+      checkVariance();
+
+      return allocatedHours;
+    }
+    
+    // Check if there's variance between budget and actual
+    function checkVariance() {
+      if (!currentEmployeeAllocation) {
+        document.getElementById('varianceSection').style.display = 'none';
+        return;
+      }
+      
+      const targetHours = parseFloat(document.getElementById('totalHours').value) || 0;
+      if (targetHours === 0) {
+        document.getElementById('varianceSection').style.display = 'none';
+        return;
+      }
+      
+      let hasVariance = false;
+      
+      // Check each funding source
+      fundingSources.forEach(source => {
+        const actualHours = parseFloat(document.getElementById(`hours-${source.key}`).value) || 0;
+        const actualPercent = targetHours > 0 ? (actualHours / targetHours) : 0;
+        const budgetPercent = currentEmployeeAllocation[source.budgetKey] || 0;
+        
+        // If there's a difference of more than 1%, flag it
+        if (Math.abs(actualPercent - budgetPercent) > 0.01 && budgetPercent > 0) {
+          hasVariance = true;
+        }
+      });
+      
+      // Show/hide variance section
+      document.getElementById('varianceSection').style.display = hasVariance ? 'block' : 'none';
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      document.getElementById('btnPrev').addEventListener('click', prevStep);
+      document.getElementById('btnNext').addEventListener('click', nextStep);
+      document.getElementById('btnSubmit').addEventListener('click', handleSubmit);
+      document.getElementById('totalHours').addEventListener('input', calculateTotal);
+      
+      // Employee name change - load budget allocation
+      document.getElementById('employeeName').addEventListener('change', function() {
+        const name = this.value.trim();
+        if (name) {
+          currentEmployeeAllocation = getEmployeeAllocation(name);
+          if (currentEmployeeAllocation) {
+            console.log('Budget allocation loaded for:', name);
+            renderFundingSources(); // Re-render to show budget info
+          } else {
+            console.log('No budget allocation found for:', name);
+            currentEmployeeAllocation = null;
+            renderFundingSources(); // Re-render anyway
+          }
+        }
+      });
+      
+      // Job title dropdown - show/hide "Other" field
+      document.getElementById('jobTitle').addEventListener('change', function() {
+        const otherGroup = document.getElementById('otherJobTitleGroup');
+        if (this.value === 'Other') {
+          otherGroup.style.display = 'block';
+        } else {
+          otherGroup.style.display = 'none';
+          document.getElementById('otherJobTitle').value = '';
+        }
+      });
+      
+      document.getElementById('payPeriod').addEventListener('change', () => {
+        // Regenerate daily breakdowns when pay period changes
+        fundingSources.forEach(source => {
+          const hours = parseFloat(document.getElementById(`hours-${source.key}`).value) || 0;
+          if (hours > 0) {
+            populateDailyBreakdown(source.key);
+          }
+        });
+      });
+    }
+
+    // Validation functions
+    function validateStep1() {
+      const errors = {};
+      
+      if (!document.getElementById('employeeName').value.trim()) {
+        errors.employeeName = '⚠ Required';
+      }
+      
+      const jobTitle = document.getElementById('jobTitle').value;
+      if (!jobTitle) {
+        errors.jobTitle = '⚠ Required';
+      } else if (jobTitle === 'Other') {
+        if (!document.getElementById('otherJobTitle').value.trim()) {
+          errors.otherJobTitle = '⚠ Please specify your job title';
+        }
+      }
+      
+      if (!document.getElementById('department').value.trim()) {
+        errors.department = '⚠ Required';
+      }
+      
+      if (!document.getElementById('payPeriod').value) {
+        errors.payPeriod = '⚠ Required';
+      }
+      
+      return errors;
+    }
+
+    function validateStep2() {
+      const errors = {};
+      
+      const totalHours = parseFloat(document.getElementById('totalHours').value) || 0;
+      
+      if (totalHours <= 0) {
+        errors.hours = '⚠ Total hours must be greater than 0. Enter hours in the projects above.';
+        return errors;
+      }
+      
+      // Check if at least one required project has hours
+      const hasRequiredProject = fundingSources.some(source => {
+        if (source.required) {
+          const hours = parseFloat(document.getElementById(`hours-${source.key}`).value) || 0;
+          return hours > 0;
+        }
+        return false;
+      });
+      
+      if (!hasRequiredProject) {
+        errors.hours = '⚠ At least one hour must be allocated to EcoEx General (Unrestricted)';
+      }
+      
+      // Validate tasks for projects with hours
+      fundingSources.forEach(source => {
+        const hours = parseFloat(document.getElementById(`hours-${source.key}`).value) || 0;
+        const tasks = document.getElementById(`tasks-${source.key}`).value.trim();
+        
+        if (hours > 0 && !tasks) {
+          errors.hours = `⚠ Please describe the tasks performed for ${source.label}`;
+        }
+      });
+      
+      return errors;
+    }
+
+    function validateStep3() {
+      const errors = {};
+      
+      const signature = document.getElementById('employeeSignature').value.trim();
+      const employeeName = document.getElementById('employeeName').value.trim();
+      
+      if (!signature) {
+        errors.employeeSignature = '⚠ Required';
+      } else if (signature.toLowerCase() !== employeeName.toLowerCase()) {
+        errors.employeeSignature = '⚠ Signature must match your name exactly';
+      }
+      
+      if (!document.getElementById('employeeDate').value) {
+        errors.employeeDate = '⚠ Required';
+      }
+      
+      return errors;
+    }
+
+    function displayErrors(errors) {
+      // Clear all error messages
+      document.querySelectorAll('.error-message').forEach(el => {
+        el.classList.remove('show');
+        el.textContent = '';
+      });
+      
+      // Display new errors
+      Object.keys(errors).forEach(key => {
+        const errorEl = document.getElementById(`error-${key}`);
+        if (errorEl) {
+          errorEl.textContent = errors[key];
+          errorEl.classList.add('show');
+        }
+      });
+    }
+
+    // Navigation
+    function prevStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateSummary();
+      }
+    }
+
+    function nextStep() {
+      let errors = {};
+      
+      if (currentStep === 1) {
+        errors = validateStep1();
+      } else if (currentStep === 2) {
+        errors = validateStep2();
+      }
+      
+      if (Object.keys(errors).length > 0) {
+        displayErrors(errors);
+        return;
+      }
+      
+      displayErrors({});
+      
+      if (currentStep < 3) {
+        currentStep++;
+        updateSummary();
+        
+        // When moving to step 3, populate daily summary table
+        if (currentStep === 2) {
+          setTimeout(() => populateDailySummaryTable(), 300);
+        }
+      }
+    }
+
+    function updateSummary() {
+      // Update sections visibility
+      for (let i = 1; i <= 3; i++) {
+        const section = document.getElementById(`section-${i}`);
+        const circle = document.getElementById(`circle-${i}`);
+        const label = document.getElementById(`label-${i}`);
+        
+        if (i === currentStep) {
+          section.classList.add('active');
+          circle.classList.add('active');
+          label.classList.add('active');
+          circle.classList.remove('completed');
+        } else if (i < currentStep) {
+          section.classList.remove('active');
+          circle.classList.remove('active');
+          circle.classList.add('completed');
+          label.classList.remove('active');
+        } else {
+          section.classList.remove('active');
+          circle.classList.remove('active', 'completed');
+          label.classList.remove('active');
+        }
+      }
+      
+      // Update buttons
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const btnSubmit = document.getElementById('btnSubmit');
+      
+      btnPrev.style.display = currentStep === 1 ? 'none' : 'block';
+      btnNext.style.display = currentStep === 3 ? 'none' : 'block';
+      btnSubmit.style.display = currentStep === 3 ? 'block' : 'none';
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Submit handler
+    async function handleSubmit() {
+      const errors = validateStep3();
+      if (Object.keys(errors).length > 0) {
+        displayErrors(errors);
+        return;
+      }
+      
+      // Check for warnings (but don't block)
+      const warnings = checkHourWarnings();
+      if (warnings.length > 0) {
+        const proceed = confirm(warnings.join('\n\n') + '\n\n¿Deseas continuar con el envío?');
+        if (!proceed) return;
+      }
+      
+      displayErrors({});
+      
+      // Show loading
+      document.getElementById('loadingOverlay').classList.add('show');
+      
+      try {
+        // Submit to Google Sheet
+        submitToSheet();
+        
+        // Generate PDF/TXT
+        generatePDF();
+        
+        // Show success after delay
+        setTimeout(() => {
+          document.getElementById('loadingOverlay').classList.remove('show');
+          document.getElementById('successModal').classList.add('show');
+          document.getElementById('submissionIdDisplay').textContent = 'Your report has been submitted successfully';
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Submission error:', error);
+        document.getElementById('loadingOverlay').classList.remove('show');
+        alert('Error submitting report. Please try again or contact Finance.');
+      }
+    }
+    
+    // Check for hour warnings (doesn't block, just warns)
+    function checkHourWarnings() {
+      const warnings = [];
+      const totalHours = parseFloat(document.getElementById('totalHours').value) || 0;
+      
+      // Warning 1: Total hours > 80 for bi-weekly period (changed from 85 to 80)
+      if (totalHours > 80) {
+        warnings.push('⚠️ ADVERTENCIA: Total de horas (' + totalHours + ') excede 80 horas para período bi-weekly.\n\nNormal es 80 horas (40hrs/semana x 2 semanas).\n\n¿Estás segura que trabajaste ' + totalHours + ' horas?');
+      }
+      
+      // Warning 2: Calculate TOTAL daily hours across ALL projects
+      const dailyTotals = {};
+      
+      // Get all daily input fields across all projects
+      const dailyInputs = document.querySelectorAll('input[type="number"][id*="daily-"]');
+      
+      dailyInputs.forEach(input => {
+        const dailyHours = parseFloat(input.value) || 0;
+        if (dailyHours > 0) {
+          // Extract day from input id (e.g., "daily-eri-Mon_2_2" -> "Mon_2_2")
+          const idParts = input.id.split('-');
+          const day = idParts.slice(2).join('-'); // Get everything after "daily-projectkey-"
+          
+          if (!dailyTotals[day]) {
+            dailyTotals[day] = 0;
+          }
+          dailyTotals[day] += dailyHours;
+        }
+      });
+      
+      // Check which days exceed 8-10 hours
+      const highDays = [];
+      Object.keys(dailyTotals).forEach(day => {
+        if (dailyTotals[day] > 10) {
+          // Get a readable label for the day
+          const dayLabel = day.replace(/_/g, '/');
+          highDays.push(dayLabel + ': ' + dailyTotals[day] + ' hrs total');
+        }
+      });
+      
+      if (highDays.length > 0) {
+        warnings.push('⚠️ ADVERTENCIA: Los siguientes días exceden 10 horas en TOTAL:\n\n' + highDays.join('\n') + '\n\n¿Estás segura de estas horas?');
+      }
+      
+      return warnings;
+    }
+    
+    // Submit to Google Sheet
+    function submitToSheet() {
+      try {
+        const payPeriod = document.getElementById('payPeriod');
+        const [startDate, endDate] = payPeriod.value.split('|');
+        
+        const jobTitleSelect = document.getElementById('jobTitle');
+        let jobTitleValue = jobTitleSelect.value;
+        if (jobTitleValue === 'Other') {
+          jobTitleValue = document.getElementById('otherJobTitle').value;
+        }
+        
+        const submissionData = {
+          employeeName: document.getElementById('employeeName').value,
+          jobTitle: jobTitleValue,
+          department: document.getElementById('department').value,
+          payPeriod: payPeriod.options[payPeriod.selectedIndex].text,
+          payPeriodStart: startDate,
+          payPeriodEnd: endDate,
+          totalHours: document.getElementById('totalHours').value,
+          employeeSignature: document.getElementById('employeeSignature').value,
+          employeeDate: document.getElementById('employeeDate').value,
+          supervisorName: getSupervisorName(document.getElementById('employeeName').value)
+        ,
+          supersedes: window.supersedesId || null
+        };
+        
+        // Collect project hours
+        fundingSources.forEach(source => {
+          const hours = parseFloat(document.getElementById('hours-' + source.key).value) || 0;
+          const tasks = document.getElementById('tasks-' + source.key).value.trim();
+          const percentage = submissionData.totalHours > 0 ? 
+            ((hours / parseFloat(submissionData.totalHours)) * 100).toFixed(1) + '%' : '0%';
+          
+          const projectMap = {
+            'eri': 'eri',
+            'nasaIsla': 'nasaIsla',
+            'oceanos': 'oceanos',
+            'capex': 'capex',
+            'dol': 'ley52',
+            'private': 'private',
+            'unrestricted': 'ecoex'
+          };
+          
+          const dataKey = projectMap[source.key];
+          if (dataKey) {
+            submissionData[dataKey + 'Hours'] = hours;
+            submissionData[dataKey + 'Percent'] = percentage;
+            submissionData[dataKey + 'Tasks'] = tasks;
+          }
+        });
+        
+        // Use iframe method to avoid CORS
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgXgnkDskNffujW7hbr98S-z-uotcGlhVMcpop26EF2iHNrSrlR2VseX_5jFd49Stj/exec';
+        
+        // Create hidden form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = APPS_SCRIPT_URL;
+        form.target = 'hidden_iframe';
+        form.style.display = 'none';
+        
+        // Add data as hidden inputs
+        const dataInput = document.createElement('input');
+        dataInput.type = 'hidden';
+        dataInput.name = 'data';
+        dataInput.value = JSON.stringify(submissionData);
+        form.appendChild(dataInput);
+        
+        // Create hidden iframe if it doesn't exist
+        let iframe = document.getElementById('hidden_iframe');
+        if (!iframe) {
+          iframe = document.createElement('iframe');
+          iframe.id = 'hidden_iframe';
+          iframe.name = 'hidden_iframe';
+          iframe.style.display = 'none';
+          document.body.appendChild(iframe);
+        }
+        
+        // Append form and submit
+        document.body.appendChild(form);
+        form.submit();
+        
+        console.log('✓ Data sent to Google Sheet');
+        
+        // Clean up after a short delay
+        setTimeout(() => {
+          document.body.removeChild(form);
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Error sending to Sheet:', error);
+      }
+    }
+    
+
+        function generateTXT() {
+      const payPeriod = document.getElementById('payPeriod');
+      const periodValue = payPeriod.value.split('|');
+      const startDate = periodValue[0];
+      const endDate = periodValue[1];
+      const periodText = payPeriod.options[payPeriod.selectedIndex].text;
+      
+      const jobTitleSelect = document.getElementById('jobTitle');
+      let jobTitleValue = jobTitleSelect.value;
+      if (jobTitleValue === 'Other') {
+        jobTitleValue = document.getElementById('otherJobTitle').value;
+      }
+      
+      const empName = document.getElementById('employeeName').value;
+      const empSig = document.getElementById('employeeSignature').value;
+      const empDate = document.getElementById('employeeDate').value;
+      const totalHrs = document.getElementById('totalHours').value;
+      const dept = document.getElementById('department').value;
+      const supName = getSupervisorName(empName);
+      
+      let reportContent = '═══════════════════════════════════════════════════════════════════\n';
+      reportContent += 'TIME & EFFORT REPORT - SUBMISSION CONFIRMATION\n';
+      reportContent += 'EcoExploratorio: Museo de Ciencias de Puerto Rico\n';
+      reportContent += '═══════════════════════════════════════════════════════════════════\n\n';
+      reportContent += 'EMPLOYEE INFORMATION\n';
+      reportContent += '────────────────────────────────────────────────────────────────────\n';
+      reportContent += 'Name: ' + empName + '\n';
+      reportContent += 'Job Title: ' + jobTitleValue + '\n';
+      reportContent += 'Department: ' + dept + '\n';
+      reportContent += 'Pay Period: ' + periodText + '\n';
+      reportContent += 'Total Hours: ' + totalHrs + '\n\n';
+      reportContent += 'TIME DISTRIBUTION BY FUNDING SOURCE\n';
+      reportContent += '────────────────────────────────────────────────────────────────────\n';
+      
+      // Add project hours
+      let totalAllocated = 0;
+      fundingSources.forEach(function(source) {
+        const hoursInput = document.getElementById('hours-' + source.key);
+        const tasksInput = document.getElementById('tasks-' + source.key);
+        const hours = parseFloat(hoursInput.value) || 0;
+        const tasks = tasksInput.value.trim();
+        if (hours > 0) {
+          const percentage = ((hours / parseFloat(totalHrs)) * 100).toFixed(1);
+          reportContent += source.label + ': ' + hours + ' hours (' + percentage + '%)\n';
+          if (tasks) {
+            reportContent += 'Activities: ' + tasks + '\n';
+          }
+          reportContent += '\n';
+          totalAllocated += hours;
+        }
+      });
+      
+      // Add PTO
+      let ptoTotal = 0;
+      ptoTypes.forEach(function(pto) {
+        const ptoInput = document.getElementById('pto-' + pto.key);
+        const hours = parseFloat(ptoInput.value) || 0;
+        if (hours > 0) {
+          ptoTotal += hours;
+          const percentage = ((hours / parseFloat(totalHrs)) * 100).toFixed(1);
+          reportContent += 'EcoEx General - ' + pto.label + ': ' + hours + ' hours (' + percentage + '%)\n';
+        }
+      });
+      
+      if (ptoTotal > 0) {
+        reportContent += '\n';
+        totalAllocated += ptoTotal;
+      }
+      
+      reportContent += 'TOTAL ALLOCATED: ' + totalAllocated.toFixed(1) + ' hours\n\n';
+      reportContent += '═══════════════════════════════════════════════════════════════════\n\n';
+      reportContent += 'EMPLOYEE CERTIFICATION\n';
+      reportContent += '────────────────────────────────────────────────────────────────────\n';
+      reportContent += 'I certify that this report accurately reflects the actual time worked\n';
+      reportContent += 'by me during the period indicated above and that the distribution of\n';
+      reportContent += 'time is a true and correct representation of my activities.\n\n';
+      reportContent += 'Employee Signature: ' + empSig + '\n';
+      reportContent += 'Date: ' + empDate + '\n\n';
+      reportContent += '═══════════════════════════════════════════════════════════════════\n\n';
+      reportContent += 'SUPERVISOR INFORMATION\n';
+      reportContent += '────────────────────────────────────────────────────────────────────\n';
+      reportContent += 'Assigned Supervisor: ' + supName + '\n';
+      reportContent += 'Status: Pending Approval\n\n';
+      reportContent += 'This report has been automatically submitted to your supervisor for\n';
+      reportContent += 'review and approval.\n\n';
+      reportContent += '═══════════════════════════════════════════════════════════════════\n';
+      reportContent += 'Generated: ' + new Date().toISOString() + '\n';
+      reportContent += 'This document was electronically generated and is valid without\n';
+      reportContent += 'physical signature.\n';
+      reportContent += '═══════════════════════════════════════════════════════════════════\n';
+      
+      // Create downloadable file
+      const blob = new Blob([reportContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'TimeEffort_' + empName.replace(/\s+/g, '_') + '_' + startDate + '_' + endDate + '.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function getSupervisorName(employeeName) {
+      const supervisorMap = {
+        // Merry Manso supervises:
+        'Alba Figueroa': 'Merry Manso',
+        'Arnaldo Cabrera': 'Merry Manso',
+        'Bryan Serrano': 'Merry Manso',
+        'Daneisha Morales': 'Merry Manso',
+        'Laureliz Antuna': 'Merry Manso',
+        
+        // Nataly Cortés supervises:
+        'Atenas Leandry': 'Nataly Cortés',
+        'Gitza Más': 'Nataly Cortés',
+        'Marieliz Díaz': 'Nataly Cortés',
+        'Sara Olivero': 'Nataly Cortés',
+        
+        // Irmaris Rivera supervises:
+        'Millie Medina': 'Irmaris Rivera',
+        'Nataly Cortés': 'Irmaris Rivera',
+        
+        // Aibenlitz Del Rio supervises:
+        'Annais Talbott': 'Aibenlitz Del Rio',
+        'Sonimar Medina': 'Aibenlitz Del Rio',
+        
+        // Ferdinand Guzmán supervises:
+        'Aibenlitz del Río': 'Ferdinand Guzmán',
+        'Gladys Flecha': 'Ferdinand Guzmán',
+        
+        // Jenny Guevara supervises:
+        'Jennifer Espada': 'Jenny Guevara',
+        'Maria Riestra': 'Jenny Guevara',
+        'Irmaris Rivera': 'Jenny Guevara',
+        'Merry Manso': 'Jenny Guevara',
+        'Ferdinand Guzmán': 'Jenny Guevara'
+      };
+      return supervisorMap[employeeName] || 'Jenny Guevara';
+
+    }
+
+    // Generate downloadable report
+    function generatePDF() {
+      // Collect all data
+      const payPeriod = document.getElementById('payPeriod');
+      const [startDate, endDate] = payPeriod.value.split('|');
+      
+      const jobTitleSelect = document.getElementById('jobTitle');
+      let jobTitleValue = jobTitleSelect.value;
+      if (jobTitleValue === 'Other') {
+        jobTitleValue = document.getElementById('otherJobTitle').value;
+      }
+      
+      const data = {
+        employeeName: document.getElementById('employeeName').value,
+        jobTitle: jobTitleValue,
+        department: document.getElementById('department').value,
+        payPeriod: payPeriod.options[payPeriod.selectedIndex].text,
+        payPeriodStart: startDate,
+        payPeriodEnd: endDate,
+        totalHours: document.getElementById('totalHours').value,
+        employeeSignature: document.getElementById('employeeSignature').value,
+        employeeDate: document.getElementById('employeeDate').value
+      };
+
+      // Generate report content
+      let reportContent = `TIME AND EFFORT REPORT
+EcoExploratorio: Museo de Ciencias de Puerto Rico
+In compliance with 2 CFR 200.430(i)
+
+═══════════════════════════════════════════════════════════════════
+
+EMPLOYEE INFORMATION
+
+Name: ${data.employeeName}
+Job Title: ${data.jobTitle}
+Department: ${data.department}
+
+PAY PERIOD
+
+Period: ${data.payPeriod}
+Total Hours Worked: ${data.totalHours} hours
+
+TIME DISTRIBUTION AND ACTIVITIES
+
+`;
+
+      let totalAllocated = 0;
+      
+      // Regular funding sources
+      fundingSources.forEach(source => {
+        const hours = parseFloat(document.getElementById(`hours-${source.key}`).value) || 0;
+        const tasks = document.getElementById(`tasks-${source.key}`).value.trim();
+        
+        if (hours > 0) {
+          const percentage = ((hours / parseFloat(data.totalHours)) * 100).toFixed(1);
+          reportContent += `${source.label}: ${hours} hours (${percentage}%)\n`;
+          if (tasks) {
+            reportContent += `Activities: ${tasks}\n`;
+          }
+          
+          // Add daily breakdown if available
+          const dailyGrid = document.getElementById(`daily-grid-${source.key}`);
+          if (dailyGrid && dailyGrid.querySelectorAll('input').length > 0) {
+            const dailyHours = [];
+            dailyGrid.querySelectorAll('input').forEach(input => {
+              const value = parseFloat(input.value) || 0;
+              if (value > 0) {
+                const label = input.parentElement.querySelector('label').textContent;
+                dailyHours.push(`${label}: ${value}hrs`);
+              }
+            });
+            if (dailyHours.length > 0) {
+              reportContent += `Daily breakdown: ${dailyHours.join(', ')}\n`;
+            }
+          }
+          
+          reportContent += `\n`;
+          totalAllocated += hours;
+        }
+      });
+      
+      // PTO section
+      let ptoTotal = 0;
+      let ptoDetails = [];
+      ptoTypes.forEach(pto => {
+        const hours = parseFloat(document.getElementById(`pto-${pto.key}`).value) || 0;
+        const dateVal = document.getElementById(`ptoDate-${pto.key}`).value.trim();
+        if (hours > 0) {
+          ptoTotal += hours;
+          ptoDetails.push(`  ${pto.label}: ${hours} hours${dateVal ? ` (${dateVal})` : ''}`);
+        }
+      });
+      
+      if (ptoTotal > 0) {
+        const percentage = ((ptoTotal / parseFloat(data.totalHours)) * 100).toFixed(1);
+        reportContent += `EcoEx General - PTO (Paid Time Off): ${ptoTotal} hours (${percentage}%)\n`;
+        reportContent += ptoDetails.join('\n') + '\n\n';
+        totalAllocated += ptoTotal;
+      }
+
+      reportContent += `TOTAL ALLOCATED: ${totalAllocated.toFixed(1)} hours
+
+═══════════════════════════════════════════════════════════════════
+`;
+
+      // Add variance explanation if provided
+      const varianceExplanation = document.getElementById('varianceExplanation');
+      if (varianceExplanation && varianceExplanation.value.trim()) {
+        reportContent += `
+VARIANCE EXPLANATION
+
+${varianceExplanation.value.trim()}
+
+═══════════════════════════════════════════════════════════════════
+`;
+      }
+
+      reportContent += `
+EMPLOYEE CERTIFICATION
+
+I certify that this report accurately reflects the actual time worked by me
+during the period indicated above and that the distribution of time is a true
+and correct representation of my activities. I understand that this information
+is used to support salary charges to grants and may be subject to audit or
+review. This certification is made in compliance with 2 CFR 200.430(i) and
+knowingly providing false information may result in disciplinary action and
+recovery of funds.
+
+Employee Signature: ${data.employeeSignature}
+Date: ${data.employeeDate}
+
+═══════════════════════════════════════════════════════════════════
+
+NEXT STEPS FOR APPROVAL
+
+Your report has been automatically submitted to your supervisor for review.
+
+What happens next:
+- Supervisor receives automatic email notification
+- Supervisor reviews and approves/rejects your report
+- You receive email confirmation of approval or rejection
+- Finance processes your T&E after supervisor approval
+
+Keep this file for your records.
+
+═══════════════════════════════════════════════════════════════════
+
+Generated: ${new Date().toISOString()}
+This document was electronically generated and is valid without physical signature.
+`;
+
+      // Create downloadable file
+      const blob = new Blob([reportContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `TimeEffort_${data.employeeName.replace(/\s+/g, '_')}_${data.payPeriodStart}_${data.payPeriodEnd}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Show success toast
+      const toast = document.getElementById('successToast');
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 5000);
+    }
+
+    // Initialize on load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    
+    // Update daily summary table when pay period changes
+    document.getElementById('payPeriod').addEventListener('change', () => {
+      populateDailySummaryTable();
+    });
+    
+    // Note: Event listeners for individual daily inputs are added in populateDailyBreakdown()
+    // We'll call updateDailySummary from there
+    }
+  </script>
+</body>
+</html>
