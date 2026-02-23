@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time & Effort Report - TESTING MODE</title>
+  
+  <!-- TESTING MODE INDICATOR -->
+  <style>
+    .testing-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #ef4444;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-weight: bold;
+      z-index: 10000;
+      font-size: 14px;
+    }
+    
+    body { margin-top: 45px !important; }
+  </style>
+  
+  <script>
+    // ============================================
+    // TESTING MODE CONFIGURATION
+    // ============================================
+    const TESTING_MODE = true;
+    
+    const TEST_CONFIG = {
+      showConsoleLog: true,
+      simulateSuccess: true,
+      simulateDelay: 1500, // ms
+      mockSubmitURL: 'https://script.google.com/macros/s/MOCK_URL/exec'
+    };
+    
+    // Mock Google Apps Script response
+    function mockGoogleAppsScript() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if (TEST_CONFIG.simulateSuccess) {
+            resolve({
+              status: 'success',
+              message: 'Test submission successful!',
+              uuid: 'TE-TEST' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+              timestamp: new Date().toISOString()
+            });
+          } else {
+            resolve({
+              status: 'error',
+              message: 'Test error simulation'
+            });
+          }
+        }, TEST_CONFIG.simulateDelay);
+      });
+    }
+    
+    // Override fetch for testing
+    if (TESTING_MODE) {
+      window.originalFetch = window.fetch;
+      window.fetch = function(...args) {
+        console.log('🧪 TESTING MODE: Intercepted fetch call', args);
+        return mockGoogleAppsScript();
+      };
+    }
+  </script>
+</head>
+<body>
+  <!-- TESTING MODE BANNER -->
+  <div class="testing-banner">
+    🧪 TESTING MODE ACTIVE - No real data will be submitted | Simulated delay: ${TEST_CONFIG.simulateDelay}ms
+  </div>
+  
+  <!-- EL RESTO DEL HTML VA AQUÍ -->
+  <h1 style="text-align: center; margin: 40px 0; color: #333;">
+    Time & Effort Report - Testing Version
+  </h1>
+  
+  <div style="max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+    <h2>📋 Testing Instructions</h2>
+    <ol style="line-height: 1.8;">
+      <li><strong>Fill out the form</strong> normally</li>
+      <li><strong>Click Submit</strong> - no real data will be sent</li>
+      <li><strong>Check browser console</strong> (F12) for detailed logs</li>
+      <li><strong>Verify</strong> the success/error message</li>
+      <li><strong>Download</strong> generated TXT file will still work</li>
+    </ol>
+    
+    <h3 style="margin-top: 30px;">🔧 Test Configuration</h3>
+    <div style="background: white; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 13px;">
+      <div><strong>Mode:</strong> Testing (No real submission)</div>
+      <div><strong>Simulate Success:</strong> <span id="testSuccess">true</span></div>
+      <div><strong>Delay:</strong> <span id="testDelay">1500ms</span></div>
+      <div><strong>Console Logs:</strong> Enabled</div>
+    </div>
+    
+    <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+      <strong>⚠️ Note:</strong> To use in production, change <code>TESTING_MODE</code> to <code>false</code> in the script section
+    </div>
+  </div>
+  
+  <script>
+    // Update test config display
+    document.getElementById('testSuccess').textContent = TEST_CONFIG.simulateSuccess;
+    document.getElementById('testDelay').textContent = TEST_CONFIG.simulateDelay + 'ms';
+    
+    // Add test console logger
+    console.log('%c🧪 TESTING MODE ACTIVE', 'background: #ef4444; color: white; padding: 8px; font-size: 14px; font-weight: bold;');
+    console.log('Test Configuration:', TEST_CONFIG);
+    console.log('To switch to production mode, set TESTING_MODE = false');
+  </script>
+</body>
+</html>
